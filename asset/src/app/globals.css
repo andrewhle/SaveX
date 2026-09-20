@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Palette — Main: #222831 · Second: #393E46 · Third: #948979 · Fourth: #DFD0B8 · Light main: #F8FAFC */
+:root {
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-hover: #eef2f7;
+  --border: #dde3ea;
+  --foreground: #222831;
+  --muted: #6b7280;
+  --accent: #948979;
+  --accent-foreground: #ffffff;
+  --positive: #3f7d5c;
+  --negative: #a4503f;
+}
+
+.dark {
+  --background: #222831;
+  --surface: #393e46;
+  --surface-hover: #454b55;
+  --border: #4d545e;
+  --foreground: #dfd0b8;
+  --muted: #a89e8d;
+  --accent: #948979;
+  --accent-foreground: #222831;
+  --positive: #7fbf9a;
+  --negative: #d98b7a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}

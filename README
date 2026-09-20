@@ -1,1 +1,27 @@
 # Budget App
+
+A personal budgeting app inspired by Copilot Money.
+
+## Structure
+
+- `asset/` — Next.js (App Router) + TypeScript + Tailwind CSS frontend.
+- `api/` — Express + TypeScript API. Currently only `GET /health`; Plaid integration goes here.
+
+Each API feature lives in `api/src/<feature>/` with a `controller/` (route declarations
+plus one file per action in `controller/actions/`) and a `service/` holding the logic.
+Routes are assembled in `api/src/routes.ts` and registered in `api/src/server.ts`.
+
+## Running
+
+```bash
+cd asset && npm install && npm run dev   # http://localhost:3000
+cd api   && npm install && npm run dev   # http://localhost:4000
+```
+
+Copy `api/.env.example` to `api/.env` before starting the API.
+
+## Theme
+
+Colors live as CSS variables in `asset/src/app/globals.css` and swap on the `.dark`
+class of `<html>`: `#222831`, `#393E46`, `#948979`, `#DFD0B8`.
+Light / dark / system is selectable on the Settings page and persists in `localStorage`.
