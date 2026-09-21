@@ -166,15 +166,12 @@ function BudgetEditor({ ownerId }: Readonly<{ ownerId: string }>) {
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div>
+      <header className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight">Budget</h1>
           <p className="mt-1 text-sm text-muted">
             Plan where every dollar goes this month.
           </p>
-        </div>
-
-        <div className="flex items-center gap-3">
           <span
             className={`text-xs ${status === "error" ? "text-negative" : "text-muted"}`}
             role="status"
@@ -185,17 +182,18 @@ function BudgetEditor({ ownerId }: Readonly<{ ownerId: string }>) {
                 ? "Unsaved changes"
                 : STATUS_LABEL[status]}
           </span>
-
-          <button
-            type="button"
-            onClick={resetAmounts}
-            disabled={status === "loading"}
-            className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-hover disabled:opacity-50"
-          >
-            <RotateCcw className="size-4" aria-hidden />
-            Reset amounts
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={resetAmounts}
+          disabled={status === "loading"}
+          className="flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-hover disabled:opacity-50"
+        >
+          <RotateCcw className="size-4" aria-hidden />
+          <span className="hidden sm:inline">Reset amounts</span>
+          <span className="sm:hidden">Reset</span>
+        </button>
       </header>
 
       <LeftOverSummary {...totals} />
@@ -282,7 +280,7 @@ function BudgetSectionCard({
               onChange={(event) => onChange(item.id, { name: event.target.value })}
               placeholder={`Name of ${section.itemLabel}`}
               aria-label={`${section.title} name`}
-              className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted focus:border-accent focus:outline-none"
+              className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-base placeholder:text-muted focus:border-accent focus:outline-none sm:text-sm"
             />
             <div className="relative w-24 shrink-0 sm:w-32">
               <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted">
@@ -298,7 +296,7 @@ function BudgetSectionCard({
                 }
                 placeholder="0"
                 aria-label={`${section.title} amount`}
-                className="w-full rounded-lg border border-border bg-background py-2 pr-3 pl-7 text-right text-sm tabular-nums placeholder:text-muted focus:border-accent focus:outline-none"
+                className="w-full rounded-lg border border-border bg-background py-2 pr-3 pl-7 text-right text-base tabular-nums placeholder:text-muted focus:border-accent focus:outline-none sm:text-sm"
               />
             </div>
             <button

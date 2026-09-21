@@ -68,7 +68,7 @@ export default function LoginPage() {
             onChange={(event) => setEmail(event.target.value)}
             required
             autoComplete="email"
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-base focus:border-accent focus:outline-none sm:text-sm"
           />
         </label>
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
             required
             minLength={8}
             autoComplete={isSignUp ? "new-password" : "current-password"}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-base focus:border-accent focus:outline-none sm:text-sm"
           />
         </label>
 
