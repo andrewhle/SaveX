@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/Sidebar";
+import { AppShell } from "@/components/AppShell";
+import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_STORAGE_KEY } from "@/lib/Theme";
 
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Budget",
+  title: "SaveX",
   description: "A personal budgeting app.",
 };
 
@@ -38,12 +39,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: themeScript }}
         />
         <ThemeProvider>
-          <div className="flex min-h-dvh flex-col md:flex-row">
-            <Sidebar />
-            <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8">
-              {children}
-            </main>
-          </div>
+          <AuthProvider>
+            <AppShell>{children}</AppShell>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

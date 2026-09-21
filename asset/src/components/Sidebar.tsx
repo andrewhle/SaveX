@@ -2,32 +2,34 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Search, Settings, Wallet } from "lucide-react";
+import { LogIn, LogOut, PiggyBank, Settings, Wallet } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Budget", icon: PiggyBank },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
-    <aside className="sticky top-0 z-30 shrink-0 border-b border-border bg-surface/95 backdrop-blur md:h-dvh md:w-64 md:border-r md:border-b-0">
-      <div className="flex items-center gap-2 px-4 pt-4 pb-3 md:pt-6">
-        <span className="grid size-8 place-items-center rounded-lg bg-accent text-accent-foreground">
-          <Wallet className="size-4" aria-hidden />
-        </span>
-        <span className="text-base font-semibold tracking-tight">Budget</span>
-      </div>
+    <aside className="sticky top-0 z-30 shrink-0 border-b border-border bg-surface/95 backdrop-blur md:flex md:h-dvh md:w-64 md:flex-col md:border-r md:border-b-0">
+      <div className="flex items-center justify-between gap-2 px-3 pt-3 pb-2 md:px-4 md:pt-6 md:pb-3">
+        <div className="flex items-center gap-2">
+          <span className="grid size-8 place-items-center rounded-lg bg-accent text-accent-foreground">
+            <Wallet className="size-4" aria-hidden />
+          </span>
+          <span className="text-base font-semibold tracking-tight">SaveX</span>
+        </div>
 
-      <div className="px-4 pb-3">
-        <SearchBar />
+        <AccountButton className="md:hidden" />
       </div>
 
       <nav
         aria-label="Main"
-        className="no-scrollbar flex gap-1 overflow-x-auto px-4 pb-4 md:flex-col md:overflow-x-visible"
+        className="no-scrollbar flex gap-1 overflow-x-auto px-3 pb-2 md:flex-1 md:flex-col md:overflow-x-visible md:px-4 md:pb-4"
       >
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
@@ -49,23 +51,53 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="hidden border-t border-border p-4 md:block">
+        {user?.email && (
+          <p className="mb-2 truncate text-xs text-muted" title={user.email}>
+            {user.email}
+          </p>
+        )}
+        <AccountButton className="w-full" />
+      </div>
     </aside>
   );
 }
 
-function SearchBar() {
-  return (
-    <div className="relative">
-      <Search
-        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted"
+const ACCOUNT_BUTTON_CLASS =
+  "flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-hover";
+
+function AccountButton({ className = "" }: Readonly<{ className?: string }>) {
+  const { user, loading, signOut } = useAuth();
+
+  if (loading) {
+    return (
+      <span
+        className={`${ACCOUNT_BUTTON_CLASS} ${className} text-muted opacity-60`}
         aria-hidden
-      />
-      <input
-        type="search"
-        placeholder="Search"
-        aria-label="Search"
-        className="w-full rounded-lg border border-border bg-background py-2 pr-3 pl-9 text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
-      />
-    </div>
+      >
+        …
+      </span>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Link href="/login" className={`${ACCOUNT_BUTTON_CLASS} ${className}`}>
+        <LogIn className="size-4" aria-hidden />
+        Log in
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => void signOut()}
+      className={`${ACCOUNT_BUTTON_CLASS} ${className}`}
+    >
+      <LogOut className="size-4" aria-hidden />
+      Sign out
+    </button>
   );
 }
