@@ -1,27 +1,94 @@
-# Budget App
+# SaveX
 
 A personal budgeting app inspired by Copilot Money.
 
+Plan a month by listing income, fixed expenses, flexible expenses and savings.
+Everything you type is saved to your own Supabase account, so the plan follows
+you between devices.
+
 ## Structure
 
-- `asset/` — Next.js (App Router) + TypeScript + Tailwind CSS frontend.
-- `api/` — Express + TypeScript API. Currently only `GET /health`; Plaid integration goes here.
+- `asset/` — Next.js (App Router) + TypeScript + Tailwind CSS. The whole app.
+- `supabase/` — `schema.sql`, the table and row level security policies.
 
-Each API feature lives in `api/src/<feature>/` with a `controller/` (route declarations
-plus one file per action in `controller/actions/`) and a `service/` holding the logic.
-Routes are assembled in `api/src/routes.ts` and registered in `api/src/server.ts`.
+There is no backend service. The browser talks straight to Supabase using the
+publishable key; row level security is what keeps each account to its own rows.
 
-## Running
-
-```bash
-cd asset && npm install && npm run dev   # http://localhost:3000
-cd api   && npm install && npm run dev   # http://localhost:4000
+```
+asset/src/
+  app/                  routes: / (budget), /login, /settings
+  components/
+    AppShell.tsx        login screen vs. app, based on the session
+    AuthProvider.tsx    session state from supabase.auth
+    BudgetPlanner.tsx   budget UI and the debounced save pipeline
+    Sidebar.tsx         nav plus the Log in / Sign out control
+  lib/
+    Budget.ts           sections, items, totals
+    BudgetRepository.ts every read and write
+    SupabaseClient.ts   the shared client
 ```
 
-Copy `api/.env.example` to `api/.env` before starting the API.
+## Setup
+
+1. Create a Supabase project.
+2. Run `supabase/schema.sql` in the Supabase SQL editor to create `budget_items`.
+3. Add `asset/.env`:
+
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+   ```
+
+   Both are safe in the browser. Never put the `service_role` key here; it
+   bypasses row level security.
+
+4. Start it:
+
+   ```bash
+   cd asset && npm install && npm run dev   # http://localhost:3000
+   ```
+
+Create an account from the login screen. Signed-out visitors only ever see that
+screen.
+
+## How saving works
+
+Typing only updates React state and flags the budget as dirty. A debounce timer
+in `BudgetPlanner.tsx` waits `SAVE_DELAY_MS` (1200ms) of no typing, then writes
+the whole budget in a single `upsert`. Removed rows are batched into one
+`delete`. So a save costs one request, or two when items were deleted — typing
+`1500` is one write, not four. The status line next to **Reset amounts** shows
+where a save is up to.
+
+## Data model
+
+`budget_items`, one row per line item, owned by `auth.uid()`:
+
+| column | notes |
+| --- | --- |
+| `id` | uuid generated in the browser, which makes upserts idempotent |
+| `owner_id` | defaults to `auth.uid()`, cascade deletes with the user |
+| `section` | `income` \| `fixed` \| `flexible` \| `saving` |
+| `name` | free text |
+| `amount` | `numeric(12,2)`, always positive |
+| `position` | order within a section |
+
+Amounts are stored as positive magnitudes. The sign lives in `BUDGET_SECTIONS`
+(`income` adds, everything else subtracts), so left over is
+`income − (fixed + flexible + saving)`.
 
 ## Theme
 
-Colors live as CSS variables in `asset/src/app/globals.css` and swap on the `.dark`
-class of `<html>`: `#222831`, `#393E46`, `#948979`, `#DFD0B8`.
-Light / dark / system is selectable on the Settings page and persists in `localStorage`.
+Colours are CSS variables in `asset/src/app/globals.css`, swapped by the `dark`
+class on `<html>`: `#222831`, `#393E46`, `#948979`, `#DFD0B8`, with `#F8FAFC` as
+the light background. Light / dark / system is selectable on the Settings page,
+persists in `localStorage`, and is applied by a `beforeInteractive` script so
+there is no flash of the wrong theme.
+
+## Deploying
+
+Vercel, with **Root Directory** set to `asset`. Add both `NEXT_PUBLIC_*`
+variables before the first build — they are inlined at build time, so a missing
+one fails the build and a changed one needs a redeploy. Afterwards, set the
+Supabase **Authentication → URL Configuration → Site URL** to the deployed
+domain so confirmation emails do not point at localhost.
